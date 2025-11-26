@@ -4,9 +4,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/PubliusVergilius/ecom-go-api/handlers"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 )
 
 // Route is an http.Handler that knows the mux pattern
@@ -28,7 +30,7 @@ type application struct {
 	timeout time.Time
 }
 
-func (app *application) Mount(route Route) *chi.Mux {
+func (app *application) Mount(routes []Route) *chi.Mux {
 
 	router := chi.NewRouter()
 
@@ -42,9 +44,19 @@ func (app *application) Mount(route Route) *chi.Mux {
 		router.Use(middleware.Timeout(60 * time.Second))
 	}
 
-	router.Handle(route.Pattern(), route)
+	for _, r := range routes {
+		router.Handle(r.Pattern(), r)
+	}
 
 	return router
+}
+
+func AsRoute(f any) any {
+	return fx.Annotate(
+		f,
+		fx.As(new(Route)),
+		fx.ResultTags(`group:"routes"`),
+	)
 }
 
 func (app *application) run() error {
@@ -52,11 +64,13 @@ func (app *application) run() error {
 	fx.New(
 		fx.Provide(
 			NewHTTPServer,
-			app.Mount,
+			zap.NewExample,
 			fx.Annotate(
-				NewHealthHandler,
-				fx.As(new(Route)),
+				app.Mount,
+				fx.ParamTags(`group:"routes"`),
 			),
+			AsRoute(handlers.NewHealthHandler),
+			AsRoute(handlers.NewHelloHandler),
 		),
 		fx.Invoke(func(*http.Server) {}),
 	).Run()
