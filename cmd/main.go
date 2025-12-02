@@ -1,12 +1,9 @@
 package main
 
 import (
-	"log"
 	"time"
 )
 
-// TODO: Create a controller thing that auto assign
-// Handlers to function as app controllers
 func main() {
 	// WebApplication(port, ctx)
 	// Handles the below code;
@@ -20,9 +17,5 @@ func main() {
 		time.Time{},
 	}
 
-	if err := api.run(); err != nil {
-		// Exit with Fx
-		log.Printf("Server has failed: %s", err.Error())
-	}
-
+	api.Run()
 }

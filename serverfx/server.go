@@ -1,4 +1,4 @@
-package main
+package serverfx
 
 import (
 	"context"
@@ -11,7 +11,13 @@ import (
 	"go.uber.org/fx"
 )
 
-func NewHTTPServer(lc fx.Lifecycle, mux *chi.Mux) *http.Server {
+var Module = fx.Options(
+	fx.Provide(
+		New,
+	),
+)
+
+func New(lc fx.Lifecycle, mux *chi.Mux) *http.Server {
 	srv := &http.Server{
 		Addr:         ":8080",
 		Handler:      mux,
