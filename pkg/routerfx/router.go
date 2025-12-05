@@ -9,7 +9,8 @@ import (
 	"go.uber.org/fx"
 )
 
-var Module = fx.Options(
+var Module = fx.Module(
+	"router",
 	fx.Provide(
 		fx.Annotate(
 			New,
@@ -19,6 +20,14 @@ var Module = fx.Options(
 		AsRoute(handlers.NewHelloHandler),
 	),
 )
+
+func AsRoute(f any) any {
+	return fx.Annotate(
+		f,
+		fx.As(new(Route)),
+		fx.ResultTags(`group:"routes"`),
+	)
+}
 
 type Route interface {
 	http.Handler
@@ -48,12 +57,4 @@ func New(routes []Route) *chi.Mux {
 	}
 
 	return router
-}
-
-func AsRoute(f any) any {
-	return fx.Annotate(
-		f,
-		fx.As(new(Route)),
-		fx.ResultTags(`group:"routes"`),
-	)
 }

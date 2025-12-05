@@ -4,10 +4,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/PubliusVergilius/ecom-go-api/loggerfx"
-	"github.com/PubliusVergilius/ecom-go-api/routerfx"
-	"github.com/PubliusVergilius/ecom-go-api/serverfx"
+	"github.com/PubliusVergilius/ecom-go-api/pkg/loggerfx"
+	"github.com/PubliusVergilius/ecom-go-api/pkg/routerfx"
+	"github.com/PubliusVergilius/ecom-go-api/pkg/serverfx"
 	"go.uber.org/fx"
+	"go.uber.org/fx/fxevent"
+	"go.uber.org/zap"
 )
 
 // Route is an http.Handler that knows the mux pattern
@@ -33,19 +35,21 @@ type dbConfig struct {
 * TODO: Make throw an error if no dbDriver is provided
  */
 type application struct {
-	config config
-	// logger //TODO: pass by injection
-	// dbDriver //TODO: pass by injection
-	timeout time.Time
+	config  config
+	timeout time.Time // Router does not know about this config
 }
 
 func (app *application) Run() {
+	logger, _ := zap.NewProduction()
+	// logger := loggerfx.New()
 
 	fx.New(
+		fx.WithLogger(func() fxevent.Logger {
+			return &fxevent.ZapLogger{Logger: logger}
+		}),
 		loggerfx.Module,
 		serverfx.Module,
 		routerfx.Module,
-
 		fx.Invoke(func(*http.Server) {}),
 	).Run()
 

@@ -13,16 +13,10 @@ I am trying to be the most minimalist as possible, relying most on the standard 
 ## Internal packages summary
 
 ### Internals package
-Files not intended to be changed.
+Files not intended to be shared; Organized by logical layers instead of domain layers. 
 
-### Modules package
-Hold the logic of database, auth and logger modules ( each of which could also be a package by it's own ).
-
-### Handlers package
-Hold the logic of what would be the controllers in other frameworks
-
-### Handlers package
-Table definitions
+### Pkg package
+Hold the logic of database connections, authentication, caching, routing, overall configuration, backend (server), and the logging system. The 'fx' postfix denotes that each module is handled by the uber-go/fx DI framework. 
 
 ### cmd package
 Application's entrypoint
